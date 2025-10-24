@@ -9,19 +9,19 @@ public class MathProblemGenerator {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("请选择题类型：");
-        System.out.println("1. 纯加法");
-        System.out.println("2. 纯减法");
-        System.out.println("3. 混合加减法");
-        int type = scanner.nextInt();
+        System.out.println("请选择运算类型：");
+        System.out.println("1. 2个数纯加法");
+        System.out.println("2. 2个数纯减法");
+        System.out.println("3. 3个数混合加减法");
+        int operationType = scanner.nextInt();
 
         System.out.println("请输入题目数量：");
         int count = scanner.nextInt();
 
-        System.out.println("是否生成3个数混合加减法？（1: 是，0: 否）");
-        int isThreeDigit = scanner.nextInt();
+        boolean isThreeDigit = operationType == 3;
+        int adjustedType = isThreeDigit ? 3 : operationType;
 
-        generateProblems(type, count, isThreeDigit == 1);
+        generateProblems(adjustedType, count, isThreeDigit);
     }
 
     private static void generateProblems(int type, int count, boolean isThreeDigit) {
@@ -33,15 +33,25 @@ public class MathProblemGenerator {
             String operator2 = isThreeDigit ? getOperator(type) : "";
 
             if (isThreeDigit) {
-                System.out.printf("%d %s %d %s %d = \n", num1, operator1, num2, operator2, num3);
+                int result = calculateResult(num1, operator1, num2, operator2, num3);
+                if (result > 0 && result < 100) {
+                    System.out.printf("%d %s %d %s %d = \n", num1, operator1, num2, operator2, num3);
+                } else {
+                    i--;
+                }
             } else {
-                System.out.printf("%d %s %d = \n", num1, operator1, num2);
+                int result = calculateResult(num1, operator1, num2, "", 0);
+                if (result > 0 && result < 100) {
+                    System.out.printf("%d %s %d = \n", num1, operator1, num2);
+                } else {
+                    i--;
+                }
             }
         }
     }
 
     private static int generateRandomNumber(boolean isThreeDigit) {
-        return random.nextInt(99) + 1; // 1-99
+        return random.nextInt(98) + 1; // 1-98 to ensure result < 100
     } 
 
     private static String getOperator(int type) {
@@ -55,5 +65,16 @@ public class MathProblemGenerator {
             default:
                 return "+";
         }
+    }
+
+    private static int calculateResult(int num1, String op1, int num2, String op2, int num3) {
+        int result;
+        if (op2.isEmpty()) {
+            result = op1.equals("+") ? num1 + num2 : num1 - num2;
+        } else {
+            int intermediate = op1.equals("+") ? num1 + num2 : num1 - num2;
+            result = op2.equals("+") ? intermediate + num3 : intermediate - num3;
+        }
+        return result;
     }
 }
